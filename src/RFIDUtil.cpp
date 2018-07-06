@@ -6,21 +6,14 @@
 #define BLOCKS_IN_SECTOR 4
 #define BYTES_IN_BLOCK 16
 
-inline void dump_byte_array(byte *buffer, byte bufferSize) {
-    for (byte i = 0; i < bufferSize; i++) {
-        Serial.print(buffer[i] < 0x10 ? " 0" : " ");
-        Serial.print(buffer[i], HEX);
-    }
-}
-
 bool RFIDUtil::ReadCard(){
   // look for a new card
   if(!reader->PICC_IsNewCardPresent())
-      return false;
+	  return false;
 
   // read the tag
   if(!reader->PICC_ReadCardSerial())
-      return false;
+	  return false;
 
   return true;
 }
@@ -38,7 +31,7 @@ bool RFIDUtil::ReadBlock(byte block, byte *result, MFRC522::MIFARE_Key *read_key
 
 	status = reader->MIFARE_Read(block, buffer, &size);
 	if(status != MFRC522::STATUS_OK){
-		if(Serial){
+		if(verbose && Serial){
 			Serial.println("[RFIDUtil] Failed to read block");
 			Serial.println(reader->GetStatusCodeName(status));
 		}
@@ -60,14 +53,16 @@ bool RFIDUtil::WriteBlock(byte block, byte *bytes, byte size, MFRC522::MIFARE_Ke
 		Authenticate(block, false, write_key);
 	}
 
-    status = (MFRC522::StatusCode) reader->MIFARE_Write(block, bytes, size);
-    if(status != MFRC522::STATUS_OK){
-      Serial.println("[RFIDUtil] Failed to write to block");
-      Serial.println(reader->GetStatusCodeName(status));
-      return false;
-    }
+	status = (MFRC522::StatusCode) reader->MIFARE_Write(block, bytes, size);
+	if(status != MFRC522::STATUS_OK){
+		if(verbose && Serial){
+			Serial.println("[RFIDUtil] Failed to write to block");
+			Serial.println(reader->GetStatusCodeName(status));
+		}
+		return false;
+	}
 
-    return true;
+	return true;
 }
 
 bool RFIDUtil::Authenticate(byte block, bool a_first, MFRC522::MIFARE_Key *key){
@@ -88,7 +83,7 @@ bool RFIDUtil::Authenticate(byte block, bool a_first, MFRC522::MIFARE_Key *key){
 
 		status = (MFRC522::StatusCode) reader->PCD_Authenticate(command, trailer_block, key, &(reader->uid));
 		if(status != MFRC522::STATUS_OK){
-			if(Serial){
+			if(verbose && Serial){
 				Serial.println("[RFIDUtil] Failed to authenticate against sector");
 				Serial.println(reader->GetStatusCodeName(status));
 			}

@@ -8,7 +8,7 @@ class RFIDUtil{
 public:
 	MFRC522::StatusCode status;
 
-	RFIDUtil(MFRC522 *_reader) : reader(_reader) {};
+	RFIDUtil(MFRC522 *_reader, bool _verbose=false) : reader(_reader), verbose(_verbose) {};
 
 	bool ReadCard();
 	bool ReadBlock(byte block, byte *result, MFRC522::MIFARE_Key *read_key, bool authenticated=false);
@@ -16,6 +16,8 @@ public:
 
 private:
 	const MFRC522 *reader;
+
+	const bool verbose;
 
 	bool Authenticate(byte block, bool a_first, MFRC522::MIFARE_Key *key);	
 };
